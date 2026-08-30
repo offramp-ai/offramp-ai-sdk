@@ -1,0 +1,49 @@
+{
+  "name": "offramp-ai-sdk",
+  "version": "0.1.1",
+  "description": "Resolve eligible prompts on-device instead of the cloud — a drop-in wrapper around your existing LLM API calls.",
+  "keywords": [
+    "llm",
+    "ai",
+    "on-device-ai",
+    "edge-ai",
+    "privacy",
+    "pii-redaction",
+    "zero-egress",
+    "cost-optimization",
+    "openai",
+    "anthropic",
+    "chrome-ai",
+    "gemini-nano"
+  ],
+  "homepage": "https://github.com/offramp-ai/offramp-ai-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/offramp-ai/offramp-ai-sdk.git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.5.3"
+  }
+}
