@@ -8,7 +8,7 @@ This code is public so you can read exactly what it does before depending on it 
 
 ## Get an API key
 
-Free, self-serve, no card required — **1,000 resolutions/month** included:
+Free, self-serve, no card required:
 
 👉 https://offramp-production-04cc.up.railway.app/signup
 
@@ -65,9 +65,9 @@ This only runs in a browser environment — `resolve()` uses browser-only APIs (
 
 ## Usage limits
 
-Every key includes 1,000 resolutions/month at no cost — no card, no billing setup, nothing to configure. There's no paid plan yet; this cap exists purely to prevent abuse of a free service, not as a paywall. For evaluating or prototyping, you're very unlikely to come close to it.
+Free to use — no card, no billing setup, nothing to configure. There's a generous anti-abuse cap behind the scenes (not a paywall — there's no paid plan yet), high enough that normal evaluation or prototyping won't come close to it. If you're actually scaling past it, reach out.
 
-If you do cross it, `resolve()` keeps working exactly as before — `cloudFallback` always runs regardless — you just lose the on-device optimization for that key until the billing period (calendar month) rolls over. Nothing breaks. If you're actually scaling past 1,000/month, reach out — happy to raise the limit.
+If you do cross it, `resolve()` keeps working exactly as before — `cloudFallback` always runs regardless — you just lose the on-device optimization for that key until the billing period (calendar month) rolls over. Nothing breaks.
 
 ## Browser support
 
