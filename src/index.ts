@@ -92,6 +92,12 @@ export interface ResolutionEvent {
   piiRedacted: boolean;
   latencyMs: number;
   timestamp: string;
+  /** Only present when using a test key (offramp_test_...). The real,
+   *  verified "would this have resolved locally" signal — computed by
+   *  actually running the full classify/resolve/validate pipeline, same as
+   *  a live key — but never substituted for the real output. See
+   *  OfframpResult.wouldResolveLocally for why this distinction exists. */
+  wouldResolveLocally?: boolean;
 }
 
 export interface OfframpResult {
@@ -100,6 +106,17 @@ export interface OfframpResult {
   category: TaskCategory;
   latencyMs: number;
   source: "rule-based" | "on-device-model" | "on-device-translator" | "cloud";
+  /** Only present when using a test key. A test key runs the real
+   *  classify/resolve/validate pipeline to get a genuine answer to "would
+   *  this prompt resolve locally" — including really calling the on-device
+   *  model where applicable, not just checking category eligibility — but
+   *  `output`/`resolvedLocally`/`source` above always reflect what actually
+   *  happened (cloudFallback's answer, every time), so integrating this SDK
+   *  can never change your app's behavior before you're ready. This field
+   *  carries the real verified signal separately, for exactly that reason:
+   *  resolvedLocally stays honest about what you actually got back,
+   *  wouldResolveLocally tells you what a live key would have done. */
+  wouldResolveLocally?: boolean;
 }
 
 const DEFAULT_API_BASE_URL = "https://offramp-production-04cc.up.railway.app";
@@ -166,6 +183,12 @@ export interface OfframpClient {
 
 export function createOfframpClient(options: OfframpClientOptions): OfframpClient {
   const { apiKey, apiBaseUrl = DEFAULT_API_BASE_URL, cloudFallback, onResolution, redactPii = true } = options;
+  // Stripe's own pattern (sk_test_/sk_live_) — the key string itself is the
+  // source of truth for test-vs-live, never a client-settable option. That
+  // matters once real billing exists: a boolean a developer could leave
+  // flipped on in production would be a way to silently dodge every
+  // charge, forever. A separate issued key closes that off entirely.
+  const isTestKey = apiKey.startsWith("offramp_test_");
 
   // Starts optimistic (true) so the very first call doesn't need a
   // blocking pre-check before it can attempt local resolution. Updated
@@ -244,14 +267,28 @@ export function createOfframpClient(options: OfframpClientOptions): OfframpClien
     // "other" always falls through — never attempts local resolution, by
     // design, same as the demo.
 
-    if (!resolvedLocally) {
+    // The real, verified "would this have resolved locally" signal —
+    // captured before anything below can override it. For a live key this
+    // is just resolvedLocally; the distinction only matters in test mode.
+    const wouldResolveLocally = resolvedLocally;
+
+    if (!resolvedLocally || isTestKey) {
+      // Test keys ALWAYS call cloudFallback and return its answer, even
+      // when local resolution just succeeded above — the whole point of a
+      // test key is proving out what WOULD happen without ever actually
+      // changing what your app gets back. Discard whatever local output
+      // was computed; it was only ever for the wouldResolveLocally signal.
       output = await cloudFallback(workingText);
       source = "cloud";
+      resolvedLocally = false;
     }
 
     const latencyMs = performance.now() - start;
 
-    reportMeterEvent(apiBaseUrl, apiKey, classification.category, resolvedLocally, attemptFailed, piiRedacted, (valid) => {
+    // Metering always carries the TRUE signal (wouldResolveLocally), not
+    // the test-mode-overridden one — this is what lets the dashboard show
+    // "here's what a live key would have saved you" from test traffic.
+    reportMeterEvent(apiBaseUrl, apiKey, classification.category, wouldResolveLocally, attemptFailed, piiRedacted, (valid) => {
       keyKnownValid = valid;
     });
 
@@ -262,6 +299,7 @@ export function createOfframpClient(options: OfframpClientOptions): OfframpClien
       piiRedacted,
       latencyMs,
       timestamp: new Date().toISOString(),
+      ...(isTestKey ? { wouldResolveLocally } : {}),
     });
 
     return {
@@ -270,6 +308,7 @@ export function createOfframpClient(options: OfframpClientOptions): OfframpClien
       category: classification.category,
       latencyMs,
       source,
+      ...(isTestKey ? { wouldResolveLocally } : {}),
     };
   }
 

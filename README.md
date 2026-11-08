@@ -12,7 +12,11 @@ Free, self-serve, no card required:
 
 👉 https://offramp-production-04cc.up.railway.app/signup
 
-Just an email address. You get a key back immediately and can start calling `resolve()` right away — there's no approval step. (If you lose your key, sign up again with the same email to get it back — there's no separate retrieval page yet.)
+Just an email address. You get **two** keys back immediately — a live key and a paired test key — and can start calling `resolve()` right away with either, no approval step. (If you lose them, sign up again with the same email to get them back — there's no separate retrieval page yet.)
+
+## Test keys
+
+Start with the test key (`offramp_test_...`). It runs the real classify/resolve/validate pipeline — including actually calling Chrome's on-device model where available — so `result.wouldResolveLocally` is a genuine, verified answer to "how much of my traffic would resolve locally," not a category-eligibility guess. But `resolve()` on a test key **always returns your `cloudFallback`'s answer**, regardless of what local resolution determined — installing this can never change what your app actually returns until you deliberately switch to the live key (`offramp_...`, no `test_`). Same pattern as Stripe's `sk_test_`/`sk_live_` — which mode you're in is determined by which key you pass, never by a setting your own code could accidentally leave on in production.
 
 ## Install
 
@@ -26,7 +30,7 @@ npm install offramp-ai-sdk
 import { createOfframpClient } from "offramp-ai-sdk";
 
 const offramp = createOfframpClient({
-  apiKey: "YOUR_API_KEY_HERE",
+  apiKey: "YOUR_API_KEY_HERE", // use your test key (offramp_test_...) first
 
   // Called only when a prompt isn't eligible for local resolution, or a
   // local attempt fails. Wire this to your own already-configured
@@ -50,6 +54,8 @@ const offramp = createOfframpClient({
 
 const result = await offramp.resolve(userPrompt);
 console.log(result.output, result.resolvedLocally);
+// On a test key: result.output is always your cloud answer, and
+// result.wouldResolveLocally tells you what a live key would have done.
 ```
 
 This only runs in a browser environment — `resolve()` uses browser-only APIs (Chrome's on-device Prompt/Translator APIs, `DOMParser`) for some of its resolution paths, so it won't work called from plain Node.js.
