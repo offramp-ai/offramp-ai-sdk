@@ -1,6 +1,6 @@
 {
   "name": "offramp-ai-sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Resolve eligible prompts on-device instead of the cloud — a drop-in wrapper around your existing LLM API calls.",
   "keywords": [
     "llm",

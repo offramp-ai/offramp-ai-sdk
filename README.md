@@ -2,7 +2,7 @@
 
 Resolves eligible prompts on-device instead of the cloud — a drop-in wrapper around whatever LLM API call your app already makes. Lower latency for eligible prompts (JSON conversion, HTML cleanup, and more) as they're resolved locally, with their content never reaching Offramp or any third-party cloud server. PII is redacted before anything happens, local or cloud, every time. Everything that isn't eligible falls through to your own cloud API automatically, unchanged.
 
-**Live demo** (no login, paste a real prompt, see where it actually resolves and why): https://offramp-production-04cc.up.railway.app
+**Live demo** (no login, paste a real prompt, see where it actually resolves and why): https://offramp-ai.com/demo
 
 This code is public so you can read exactly what it does before depending on it — it is **not open source**; see [License](#license) below.
 
@@ -10,7 +10,7 @@ This code is public so you can read exactly what it does before depending on it 
 
 Free, self-serve, no card required:
 
-👉 https://offramp-production-04cc.up.railway.app/signup
+👉 https://offramp-ai.com/signup
 
 Just an email address. You get **two** keys back immediately — a live key and a paired test key — and can start calling `resolve()` right away with either, no approval step. (If you lose them, sign up again with the same email to get them back — there's no separate retrieval page yet.)
 

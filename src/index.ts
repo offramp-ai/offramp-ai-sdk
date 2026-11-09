@@ -119,7 +119,7 @@ export interface OfframpResult {
   wouldResolveLocally?: boolean;
 }
 
-const DEFAULT_API_BASE_URL = "https://offramp-production-04cc.up.railway.app";
+const DEFAULT_API_BASE_URL = "https://offramp-ai.com";
 
 export interface OfframpClientOptions {
   /** Required — issued per customer for usage-based billing during this
